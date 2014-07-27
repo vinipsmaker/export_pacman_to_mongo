@@ -24,6 +24,7 @@ The script dependencies:
 * Define a JSON schema to help dude to understand what fields dude should expect
   in the documents.
 * Rename `name` to `_id` (?).
+* Gather package's origin (repo).
 
 # LICENSE
 

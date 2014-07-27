@@ -83,7 +83,7 @@ def optional_deps_to_hierarchical(buffer):
 
     return ret
 
-def package_to_hierarchical(package):
+def package_to_hierarchical(package, repo):
     delim = ': '
 
     # optional_deps is handled separately
@@ -130,12 +130,24 @@ def package_to_hierarchical(package):
             ret[key] = [multi_valued_properties[key](i)
                         for i in value.split('  ')]
 
+    # begin of 'repo' handling
+
+    if repo != "":
+        ret["repo"] = repo
+
+    # end of 'repo' handling
+
     return ret
 
 packages = [i.split(' ')[0]
             for i in str(subprocess.check_output(['pacman', '-Q'],
                                                  universal_newlines=True))
                      .split('\n')[:-1]]
+
+local_packages = [i.split(' ')[0]
+                  for i in str(subprocess.check_output(['pacman', '-Qm'],
+                                                       universal_newlines=True))
+                           .split('\n')[:-1]]
 
 client = pymongo.MongoClient()
 
@@ -145,6 +157,7 @@ coll = db.packages
 
 nimported = 0
 for p in packages:
-    coll.insert(package_to_hierarchical(p))
+    repo = "local" if p in local_packages else ""
+    coll.insert(package_to_hierarchical(p, repo))
     nimported += 1
     print("Imported:", str(nimported) + '/' + str(len(packages)))
